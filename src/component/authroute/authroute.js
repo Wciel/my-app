@@ -25,7 +25,7 @@ class AuthRoute extends React.Component {
                         this.props.loginData(res.data.data)
                         console.log(res)
                     }else{
-                        this.props.history.push('./login')
+                        this.props.history.push('/login')
                     }
                 }
             })

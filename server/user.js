@@ -5,8 +5,9 @@ const model = require('./model')
 const User = model.getModel('user')
 const _filter = {'pwd':0,'_v':0} //隐藏pwd和_v
 Router.get('/list',function(req,res){
-    User.find({},function(err,doc){
-        return res.json(doc)
+    const {type} = req.query //get请求参数用query获取，post请求参数用body获取
+    User.find({type},function(err,doc){
+        return res.json({code:0,data:doc})
     })
 })
 Router.post('/login',function(req,res){

@@ -2,6 +2,7 @@ import axios from "axios"
 import {getRedirectPath} from '../util' //获取一个纯函数，传入的信息来判断跳转到哪里
 const ERROR_MSG = 'ERROR_MSG'
 const LOGIN_DATA = 'LOGIN_DATA'
+const LOGOUT = 'LOGOUT'
 const AUTH_SUCESS = 'AUTH_SUCESS' //验证成功
 const initState = {
     RedirectTo:'',
@@ -19,6 +20,8 @@ export function user(state=initState,action){
             return {...state,...action.payload}
         case ERROR_MSG:
             return {...state,isAuth:false,msg:action.msg}
+        case LOGOUT:
+            return {...initState,RedirectTo:'/login'}
         default:
             return state
     }
@@ -49,6 +52,11 @@ export function update(data){
 export function loginData(userinfo){
     return {type:LOGIN_DATA, payload:userinfo}
 }
+
+export function logoutSubmit(){
+    return {type:LOGOUT}
+}
+
 //登录检测
 export function login({user,pwd}){
     if(!user||!pwd){

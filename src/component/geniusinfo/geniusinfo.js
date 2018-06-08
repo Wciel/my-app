@@ -19,7 +19,6 @@ class GeniusInfo extends React.Component {
         }
     }
     handleChange(key,val){
-        console.log(this.props.location.pathname)
         this.setState({
             [key]:val
         })

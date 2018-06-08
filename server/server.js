@@ -15,13 +15,24 @@
 const express = require('express')
 const bodyParser = require('body-parser') //专门来接收post参数
 const cookieParser = require('cookie-parser')
+const app = express()
+//work width express要将http的接口与soket.io的接口相互统一起来
+// const server = require('http').Server(app) //用http将server包一层，然后再将server传给io对象
+// const io = require('socket.io')(server)　//io和express已经关联起来了
+
+
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
+io.on('connection',function(socket){
+	socket.on('sendmsg',function(data){ //这里要用socket因为这是这次链接的请求，io是全局的请求
+		io.emit('recvmsg',data) //将接受到的东西发送到全局，每个人都是接收的状态
+	})
+}) //io.on简体能事件．看是否链接起来了
 
 const userRouter = require('./user')
-
-const app = express()
 app.use(cookieParser())
 app.use(bodyParser.json())
 app.use('/user',userRouter)
-app.listen(9093,function(){
+server.listen(9093,function(){
 	console.log('Node app start at port 9093')
 })

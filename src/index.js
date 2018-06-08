@@ -11,6 +11,7 @@ import AuthRoute from './component/authroute/authroute'
 import GeniusInfo from './component/geniusinfo/geniusinfo'
 import Dashboard from './component/dashboard/dashboard'　//其他页面暂时交给dashboard页面管理
 import reducers from './reducers'
+import Chat from './component/chat/chat'
 import './config'
 import './index.css'
 
@@ -29,8 +30,9 @@ ReactDom.render(
 						<Route path='/geniusinfo' component={GeniusInfo}></Route>
 						<Route path='/login' component={Login}></Route>
 						<Route path='/register' component={Register}></Route>
+						<Route path='/chat/:user' component={Chat}></Route>
 						<Route component={Dashboard}></Route>　{/*在没有path的情况下就会自动跳到这里来，没有switch,进入任何一个页面都会显示dashboard
-						                                        如果没有任何路由命中就会跳到Ｄashboard里面*/}
+					                                   如果没有任何路由命中就会跳到Ｄashboard里面*/}
 					</Switch>
 				
 			</div>
