@@ -1,11 +1,14 @@
 import React from 'react'
-import io from 'socket.io-client'
-import {List,InputItem} from 'antd-mobile'
-const socket = io('ws://localhost:9093')//因为我们现在是跨域的，前端的端口在3000，后端的在9093所以要手动链接一下
-socket.on('recvmsg',function(data){
-  console.log(data)
-})
-
+import {List,InputItem,NavBar,Icon,Grid} from 'antd-mobile'
+import {connect} from 'react-redux'
+import {getMsgList,sendMsg,recvMsg} from '../../redux/chat.redux'
+import { Socket } from 'dgram';
+import '../../index.css'
+import { getChatId } from '../../util';
+@connect(
+  state =>state,
+  {getMsgList,sendMsg,recvMsg}
+)
 class Chat extends  React.Component {
 
   constructor(props){
@@ -13,23 +16,67 @@ class Chat extends  React.Component {
     this.state={text:'',msg:[]}
   }
   componentDidMount(){
-    socket.on('recvmsg',(data)=>{
-      this.setState({
-        msg:[...this.state.msg,data.text]
-      })
-    })
+    if(!this.props.chat.chatmsg.length) {
+      this.props.getMsgList()
+      this.props.recvMsg()　//这个页面接收消息
+    } //获取列表
   }
+   
+  fixCarousel(){
+    setTimeout(function(){
+      window.dispatchEvent(new Event('resize'))
+    },0)//解决图片没有任何值，但是仍然是占了高度的问题
+  } //修正跑马灯
+
   handleSubmit(){
-    socket.emit('sendmsg',{text:this.state.text})
+    const from = this.props.user._id //是谁发的就是是谁登录的
+    const to = this.props.match.params.user //这是发给谁的路径在url里就是你点击之后
+    const msg = this.state.text
+    this.props.sendMsg({from, to, msg})　//发送每条消息给后台
     this.setState({
-     text:''
+     text:'',
+     showEmoji:false
     })
   }
   render() {
+    const emoji = '😀 😃 😄 😁 😆 😅 😂 😊 😇 🙂 🙃 😉 😌 😍 😘 😗 😙 😚 😋 😜 😝 😛 🤑 🤗 🤓 😎 😏 😒 😞 😔 😟 😕 🙁 😣 😖 😫 😩 😤 😠 😡 😶 😐 😑 😯 😦 😧 😮 😲 😵 😳 😱 😨 😰 😢 😥 😭 😓 😪 😴 🙄 🤔 😬 🤐 😷 🤒 🤕 😈 👿 👹 👺 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 😼 😽 🙀 😿 😾 👐 🙌 👏 🙏 👍 👎 👊 ✊ 🤘 👌 👈 👉 👆 👇 ✋  🖐 🖖 👋  💪 🖕 ✍️  💅 🖖 💄 💋 👄 👅 👂 👃 👁 👀 '
+    .split(' ')
+    .filter(v=>v)
+    .map(v=>({text:v}))
+
+    const userid = this.props.match.params.user //对方的id
+    const Item = List.Item
+    const users = this.props.chat.users
+    const chatid = getChatId(userid,this.props.user._id)　//这里是用来区分是谁发送给谁的，就是实现一对一的对话，避免信息泄漏
+    const chatmsgs = this.props.chat.chatmsg.filter(v=>v.chatid==chatid)
+    if(!users[userid]) {
+      return null //如果没有用户或者没有用户id这个页面就不用渲染了
+    }
     return (
       <div>
-        {this.state.msg.map((v)=>{
-          return <p key={v}>{v}</p>
+        <NavBar 
+            mode='dark'
+            icon={<Icon type="left" />}
+				  	onLeftClick={()=>{
+						this.props.history.goBack()
+					}}>
+          {users[userid].name}
+        </NavBar>
+
+        {chatmsgs.map((v)=>{
+          const avatar = require(`../img/${users[v.from].avatar}.png`)
+          return v.from === userid?(
+            <List key={v._id}>
+              <Item
+              thumb={avatar}
+              >{v.content}</Item>
+            </List>
+          ): (<List key={v._id}>
+              <Item
+                extra={<img src={avatar}/>}
+                className='chat-me'
+              >{v.content}</Item>
+            </List>)
         })}
         <div className = 'stick-footer'>
           <List>
@@ -41,10 +88,34 @@ class Chat extends  React.Component {
                   text:v
                 })
               }}
-              extra={<span onClick={()=>this.handleSubmit()}>发送</span>}
+              extra={
+                <div>
+                  <span
+                    onClick={()=>{
+                      this.setState({
+                        showEmoji:!this.state.showEmoji
+                      })
+                      this.fixCarousel()
+                    }}
+                    style={{marginRight:15}}
+                  >😂</span>
+                  <span onClick={()=>this.handleSubmit()}>发送</span>
+                </div>
+              }
             >
             </InputItem>
           </List>
+          {this.state.showEmoji?(<Grid
+            data={emoji}//一行显示9个
+            columnNum={9}//一共4列
+            carouselMaxRow={4}//是不是跑马灯
+            isCarousel={true}
+            onClick={el=>{
+              this.setState({
+                text:this.state.text+el.text
+              })
+            }}
+          />):null}
         </div>
       </div>
     );

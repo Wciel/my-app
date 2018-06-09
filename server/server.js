@@ -15,6 +15,8 @@
 const express = require('express')
 const bodyParser = require('body-parser') //专门来接收post参数
 const cookieParser = require('cookie-parser')
+const model = require('./model')
+const Chat = model.getModel('chat')
 const app = express()
 //work width express要将http的接口与soket.io的接口相互统一起来
 // const server = require('http').Server(app) //用http将server包一层，然后再将server传给io对象
@@ -23,12 +25,33 @@ const app = express()
 
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
-io.on('connection',function(socket){
-	socket.on('sendmsg',function(data){ //这里要用socket因为这是这次链接的请求，io是全局的请求
-		io.emit('recvmsg',data) //将接受到的东西发送到全局，每个人都是接收的状态
-	})
-}) //io.on简体能事件．看是否链接起来了
+// io.on('connection',function(socket){
+// 	socket.on('sendmsg',function(data){ //这里要用socket因为这是这次链接的请求，io是全局的请求
+// 		// console.log(data)
+// 		// io.emit('recvmsg',data) //将接受到的东西发送到全局，每个人都是接收的状态
+// 		const {from,to,msg} = data
+// 		const chatid = [from,to].sort().join('_')
+// 		Chat.create({chatid,from,to,contet:msg},function(err,doc){
+// 			io.emit('recvmsg',Object.assign({},doc._doc))
+// 		})
+// 	})
+// }) //io.on简体能事件．看是否链接起来了
 
+
+io.on('connection',function(socket){
+	// console.log('user login')
+	socket.on('sendmsg',function(data){
+		const {from, to, msg} = data
+		const chatid = [from,to].sort().join('_')
+		Chat.create({chatid,from,to,content:msg},function(err,doc){
+			io.emit('recvmsg', Object.assign({},doc._doc))
+		})
+	})
+})
+
+// Chat.remove({},function(err,doc){
+
+// })
 const userRouter = require('./user')
 app.use(cookieParser())
 app.use(bodyParser.json())
