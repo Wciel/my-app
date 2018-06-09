@@ -2,7 +2,6 @@ import React from 'react'
 import {List,InputItem,NavBar,Icon,Grid} from 'antd-mobile'
 import {connect} from 'react-redux'
 import {getMsgList,sendMsg,recvMsg} from '../../redux/chat.redux'
-import { Socket } from 'dgram';
 import '../../index.css'
 import { getChatId } from '../../util';
 @connect(
@@ -48,7 +47,7 @@ class Chat extends  React.Component {
     const Item = List.Item
     const users = this.props.chat.users
     const chatid = getChatId(userid,this.props.user._id)　//这里是用来区分是谁发送给谁的，就是实现一对一的对话，避免信息泄漏
-    const chatmsgs = this.props.chat.chatmsg.filter(v=>v.chatid==chatid)
+    const chatmsgs = this.props.chat.chatmsg.filter(v=>v.chatid===chatid)
     if(!users[userid]) {
       return null //如果没有用户或者没有用户id这个页面就不用渲染了
     }
