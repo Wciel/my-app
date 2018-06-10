@@ -22,33 +22,53 @@ Router.post('/login',function(req,res){
 	})
 })
 
-// Router.get('/getmsglist',function(req,res){
-//     const user = req.cookies.userid //获取服务器上存着的的用户id
-    // User.find({},function(e,userdoc){
-    //     let users = {} //将查找出来的用户换成对象形式
-    //     userdoc.forEach(v=>{
-    //         users[v._id] = {name:v.user,avatar:v.avatar}
-    //     })
-    //     //$or查询多个条件,将谁发的和发给谁的查出来
-    //     Chat.find({'$or':[{from:user},{to:user}]},function(err,doc){
-    //         if(!err){
-    //             return res.json({code:0,msgs:doc,users:users}) /* 这里是将我们数据库的列表查出来返回给前端，
-    //                                                              接下来在前端把数据放到redux上*/
-    //         }
-    //     })
-    // })
+//mongodb里面updata默认的是修改第一个找到的
+Router.post('/readmsg', function(req, res){
+	const userid = req.cookies.userid
+	const {from} = req.body
+	Chat.update(
+		{from,to:userid}, //查询别人发给我的消息
+		{'$set':{read:true}},　//将这个消息标记为已读
+		{'multi':true},　//加这个参数可以查询修改多条相匹配数据
+		function(err,doc){
+		console.log(doc)
+		if (!err) {
+			return res.json({code:0,num:doc.nModified})　//返回修改了状态的条数
+		}
+		return res.json({code:1,msg:'修改失败'})
+	})
+})
+// Router.post('/readMsg',function(req,res){
+//     const userid = req.cookies.userid
+//     const {from} = req.body
+//     //mongodb里面updata默认的是修改第一个找到的
+//     console.log(from,userid)
+//     Chat.update(
+//         {from,to:userid}, //查到要改的消息
+//         {'$set':{read:true}},　//将要改的消息的read状态标记为true
+//         {'multi':true},　//加上这个参数这里可以查询多条数据
+//         function(err,doc){
+//             console.log(doc)
+//             if(!err){
+//                 return res.json({code:0,num:doc.nModified})
+//             }
+//             return res.json({code:1,msg:'修改失败'})
+//         }
+//     )
 // })
 Router.get('/getmsglist',function(req,res){
-	const user = req.cookies.userid
+	const user = req.cookies.userid//获取服务器上存着的的登录用户id
 
 	User.find({},function(e,userdoc){
-		let users = {}
+		let users = {}//将查找出来的用户换成对象形式
 		userdoc.forEach(v=>{
 			users[v._id] = {name:v.user, avatar:v.avatar}
-		})
+        })
+        //$or查询多个条件,将谁发的和发给谁的查出来
 		Chat.find({'$or':[{from:user},{to:user}]},function(err,doc){
 			if (!err) {
-				return res.json({code:0,msgs:doc, users:users})
+				return res.json({code:0,msgs:doc, users:users}) /* 这里是将我们数据库的列表查出来返回给前端，
+                //                                                              接下来在前端把数据放到redux上*/
 			}
 		})
 	})

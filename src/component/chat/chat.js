@@ -1,12 +1,12 @@
 import React from 'react'
 import {List,InputItem,NavBar,Icon,Grid} from 'antd-mobile'
 import {connect} from 'react-redux'
-import {getMsgList,sendMsg,recvMsg} from '../../redux/chat.redux'
+import {getMsgList,sendMsg,recvMsg,readMsg} from '../../redux/chat.redux'
 import '../../index.css'
 import { getChatId } from '../../util';
 @connect(
   state =>state,
-  {getMsgList,sendMsg,recvMsg}
+  {getMsgList,sendMsg,recvMsg,readMsg}
 )
 class Chat extends  React.Component {
 
@@ -14,13 +14,28 @@ class Chat extends  React.Component {
     super(props)
     this.state={text:'',msg:[]}
   }
+  // componentDidMount(){
+  //   if(!this.props.chat.chatmsg.length) {
+  //     this.props.getMsgList()
+  //     this.props.recvMsg()　//这个页面接收消息
+  //   } 
+  // }
+  //  //组件被移除或者被隐藏的时候触发，当前组件一离开就会被干掉
+  //  componentWillUnmount(){
+  //   const to = this.props.match.params.user
+  //   this.props.readMsg(to)
+  //  }
+
   componentDidMount(){
-    if(!this.props.chat.chatmsg.length) {
-      this.props.getMsgList()
-      this.props.recvMsg()　//这个页面接收消息
-    } //获取列表
-  }
-   
+		if (!this.props.chat.chatmsg.length) {
+			this.props.getMsgList()
+			this.props.recvMsg()	
+		}
+	}
+	componentWillUnmount(){
+		const to = this.props.match.params.user
+		this.props.readMsg(to)
+	}
   fixCarousel(){
     setTimeout(function(){
       window.dispatchEvent(new Event('resize'))
