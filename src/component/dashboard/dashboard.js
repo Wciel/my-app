@@ -8,7 +8,7 @@ import Boss from '../../component/boss/boss'
 import Genius from '../../component/genius/genius'
 import User from '../../component/user/user'
 import Msg from '../../component/msg/msg'
-
+import QueueAnim from 'rc-queue-anim'
 @connect(
 	state=>state,
 	{getMsgList,sendMsg,recvMsg}
@@ -55,17 +55,19 @@ class Dashboard extends React.Component{
 				component:User
 			}
 		]
-
-
 		return (
 			<div>
-				<NavBar className='fixd-header' mode='dard'>{navList.find(v=>v.path===pathname).title}</NavBar>
+				<NavBar className='fixd-header' mode='dard'>{navList.find(v=>v.path==pathname)&&navList.find(v=>v.path==pathname).title}</NavBar>
 				<div style={{marginTop:45}}>
-						<Switch>
-							{navList.map(v=>(
-								<Route key={v.path} path={v.path} component={v.component}></Route>
-							))}
-						</Switch>
+					<QueueAnim type='scalex' duration={800}>
+					   	<Switch>
+							
+								{navList.map(v=>(
+									<Route key={v.path} path={v.path} component={v.component}></Route>
+								))}
+						
+						   </Switch>	
+						</QueueAnim>
 				</div>
 
 				<NavLinkBar data={navList}></NavLinkBar>

@@ -29,7 +29,6 @@ class NavLinkBar extends React.Component {
             onPress = {()=>this.props.history.push(v.path)
             }
 					>
-					
 					</TabBar.Item>
 				))}
        </TabBar>

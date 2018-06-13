@@ -4,6 +4,7 @@ import {connect} from 'react-redux'
 import {getMsgList,sendMsg,recvMsg,readMsg} from '../../redux/chat.redux'
 import '../../index.css'
 import { getChatId } from '../../util';
+import QueueAnim from 'rc-queue-anim'
 @connect(
   state =>state,
   {getMsgList,sendMsg,recvMsg,readMsg}
@@ -33,6 +34,7 @@ class Chat extends  React.Component {
 		}
 	}
 	componentWillUnmount(){
+    console.log('unmount')
 		const to = this.props.match.params.user
 		this.props.readMsg(to)
 	}
@@ -62,6 +64,7 @@ class Chat extends  React.Component {
     const Item = List.Item
     const users = this.props.chat.users
     const chatid = getChatId(userid,this.props.user._id)　//这里是用来区分是谁发送给谁的，就是实现一对一的对话，避免信息泄漏
+
     const chatmsgs = this.props.chat.chatmsg.filter(v=>v.chatid===chatid)
     if(!users[userid]) {
       return null //如果没有用户或者没有用户id这个页面就不用渲染了
@@ -76,22 +79,23 @@ class Chat extends  React.Component {
 					}}>
           {users[userid].name}
         </NavBar>
-
-        {chatmsgs.map((v)=>{
-          const avatar = require(`../img/${users[v.from].avatar}.png`)
-          return v.from === userid?(
-            <List key={v._id}>
-              <Item
-              thumb={avatar}
-              >{v.content}</Item>
-            </List>
-          ): (<List key={v._id}>
-              <Item
-                extra={<img src={avatar}/>}
-                className='chat-me'
-              >{v.content}</Item>
-            </List>)
-        })}
+        <QueueAnim type='left' delay={100}>
+          {chatmsgs.map((v)=>{
+            const avatar = require(`../img/${users[v.from].avatar}.png`)
+            return v.from === userid?(
+              <List key={v._id}>
+                <Item
+                thumb={avatar}
+                >{v.content}</Item>
+              </List>
+            ): (<List key={v._id}>
+                <Item
+                  extra={<img alt='图片' src={avatar}/>}
+                  className='chat-me'
+                >{v.content}</Item>
+              </List>)
+          })}
+        </QueueAnim>
         <div className = 'stick-footer'>
           <List>
             <InputItem
@@ -105,6 +109,7 @@ class Chat extends  React.Component {
               extra={
                 <div>
                   <span
+                  　role="img"
                     onClick={()=>{
                       this.setState({
                         showEmoji:!this.state.showEmoji

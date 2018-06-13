@@ -33,7 +33,7 @@ class Msg extends React.Component {
     const Brief = Item.Brief
     return (
       <div>
-          {chatList.length&&chatList.map(v=>{
+          {chatList&&chatList.map(v=>{
             const lastItem = this.getLastMsg(v)
             const targetId = v[0].from===userid?v[0].to:v[0].from
             const unreadNum = v.filter(val=>!val.read&&val.to===userid).length
@@ -56,7 +56,6 @@ class Msg extends React.Component {
             )
           })}
       </div>
-      
     );
   }
 }
